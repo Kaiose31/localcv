@@ -19,10 +19,16 @@ IRL requires reverse engineering some hardware to fetch their video streams.
 1080p stream requires ~ 5 Mb/s
 100 Streams ~ 500 Mb/s
 
-Feasible AI Server Specs: 
-
-
+AI Server Specs (Target): 
+FLOPS: ~330 TFLOPS  
+GPU: 4x RTX 4090 
+GPU MEMORY: 48GB @ 21GB/s
+MEMORY: 128GB @ 200 GB/s
+CPU: 32 Core AMD EPYC
+NETWORK: WIFI 6E @ 9.6 GB/s
+COST: ~$4900
 
 ## TODO: 
+1. single thread SRT server capable of accepting multiple connections.
 
 
