@@ -29,6 +29,10 @@ NETWORK: WIFI 6E @ 9.6 GB/s
 COST: ~$4900
 
 ## TODO: 
-1. single thread SRT server capable of accepting multiple connections.
+1. single thread SRT server capable of accepting multiple connections. [Baseline implementation](https://github.com/Haivision/srt)
+
+
+## Benchmark
+Use ffmpeg with script to create video streams that from data that hit the target server.
 
 
