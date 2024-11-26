@@ -25,6 +25,8 @@ def stream_video(vid, url, res):
         "-re",
         "-i",
         vid,
+        "-r",
+        "10",
         "-vf",
         f"scale={res},format=gray",
         "-pix_fmt",
