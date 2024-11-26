@@ -16,21 +16,26 @@ IRL requires reverse engineering some hardware to fetch their video streams.
 
 2. Scaling: Local Hardware and network can be vertically scaled to decrease latency over number of devices. A network of 500Gb/s bandwidth can support max 100 HD video stream devices concurrently.
 
-1080p stream requires ~ 5 Mb/s
-100 Streams ~ 500 Mb/s
+1080p stream requires ~ 5 Mb/s\
+100 Streams ~ 500 Mb/s\
 
-AI Server Specs (Target): 
-FLOPS: ~330 TFLOPS  
-GPU: 4x RTX 4090 
-GPU MEMORY: 48GB @ 21GB/s
-MEMORY: 128GB @ 200 GB/s
-CPU: 32 Core AMD EPYC
-NETWORK: WIFI 6E @ 9.6 GB/s
-COST: ~$4900
+AI Server Specs (Target): \
+FLOPS: ~330 TFLOPS  \
+GPU: 4x RTX 4090 \
+GPU MEMORY: 48GB @ 21GB/s\
+MEMORY: 128GB @ 200 GB/s\
+CPU: 32 Core AMD EPYC\
+NETWORK: WIFI 6E @ 9.6 GB/s\
+COST: ~$4900\
 
 ## TODO: 
-1. single thread SRT server capable of accepting multiple connections. [Baseline implementation](https://github.com/Haivision/srt)
-
+- [x] single thread SRT server capable of accepting multiple connections. [Baseline implementation](https://github.com/Haivision/srt)
+- [x] parallel server cluster
+- [x] render multiple video streams.
+- [ ] create binding for C/C++ call to inference func.
+- [ ] display depth image with original in renderer.
+- [ ] compiled C/C++ binary with model and inference on GPU
+- [ ] benchmark frame processing time, latency/num of devices 
 
 ## Benchmark
 Use ffmpeg with script to create video streams that from data that hit the target server.
