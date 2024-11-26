@@ -19,7 +19,6 @@ def video_paths(dir: Path, devices: int) -> tuple[List[str], List[str]]:
 
 
 def stream_video(vid, url, res):
-    logger.debug(f"streaming {vid}@{res} to {url}")
     command = [
         "ffmpeg",
         "-re",
@@ -49,9 +48,10 @@ def stream_video(vid, url, res):
     ]
 
     try:
-        res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
-        logger.debug(f"stdout: {res.stdout}")
-        logger.debug(f"stderr: {res.stderr}")
+        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+        logger.debug(f"streaming {vid}@{res} to {url}")
+        logger.debug(f"stdout: {result.stdout}")
+        logger.debug(f"stderr: {result.stderr}")
     except Exception as e:
         logger.error(f"An unexpected error occurred: {e}")
 
@@ -62,7 +62,6 @@ if __name__ == "__main__":
     height = sys.argv[3]
     res = width + "x" + height
     vids, urls = video_paths(Path("data"), int(devices))
-
     procs = []
     for vid, url in zip(vids, urls):
         proc = Process(target=stream_video, args=(vid, url, res))

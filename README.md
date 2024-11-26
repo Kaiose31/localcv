@@ -1,5 +1,15 @@
 # localcv 
 
+# Installation:
+```
+brew install ffmpeg
+brew install opencv
+```
+
+#Build
+```
+cargo build
+```
 
 ## Research: 
 1. Current stack: can run low powered hardware with simple algorithms, cant run anything above 8Gflops. Requires cloud processing for heavy computation,aggregation,user management, which means connecting to internet and maybe violating privacy. No Iot should need to connect to the internet. Using local AI server, we move all computation to an optimized GPU env while handling storage,aggregation and management on the local network.
@@ -32,13 +42,14 @@ COST: ~$4900\
 - [x] single thread SRT server capable of accepting multiple connections. [Baseline implementation](https://github.com/Haivision/srt)
 - [x] parallel server cluster
 - [x] render multiple video streams.
-- [ ] create binding for C/C++ call to inference func.
-- [ ] display depth image with original in renderer.
+- [x] create binding for C/C++ call to inference func.
+- [x] display depth image with original in renderer.
 - [ ] compiled C/C++ binary with model and inference on GPU
 - [ ] benchmark execution time of the depth estimation algorithm
 - [ ] benchmark frame processing time, latency/num of devices 
 
 ## Benchmark
 Use ffmpeg with script to create video streams that from data that hit the target server.
+
 
 

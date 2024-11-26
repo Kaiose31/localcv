@@ -18,7 +18,7 @@ async fn main() -> Result<()> {
     let args = Args::parse();
     let servers = ServerConfig::new(args.devices, args.width, args.height);
     highgui::named_window_def(window_name)?;
-    let (tx, mut rx) = mpsc::channel::<(usize, Mat)>(4096);
+    let (tx, mut rx) = mpsc::channel::<(usize, Mat, Mat)>(100);
 
     // start listeners
     let tasks: Vec<_> = servers
@@ -32,13 +32,12 @@ async fn main() -> Result<()> {
         .collect();
 
     //TODO: record depth frames additionally.
-    let mut frames: Vec<Option<Mat>> = vec![None; args.devices];
-
+    let mut frames: Vec<Option<(Mat, Mat)>> = vec![None; args.devices];
     //start render loop
     loop {
         // This can be optimized to receive many from the buffer
-        if let Some((index, frame)) = rx.recv().await {
-            frames[index] = Some(frame);
+        if let Some((index, frame, depth_frame)) = rx.recv().await {
+            frames[index] = Some((frame, depth_frame));
         }
 
         let mut grid = Mat::default();
@@ -61,7 +60,7 @@ async fn main() -> Result<()> {
 async fn capture_stream(
     stream: String,
     index: usize,
-    tx: mpsc::Sender<(usize, Mat)>,
+    tx: mpsc::Sender<(usize, Mat, Mat)>,
 ) -> Result<()> {
     let flags = capture_params();
 
@@ -70,7 +69,7 @@ async fn capture_stream(
         videoio::CAP_FFMPEG,
         &flags,
     )?;
-    cap.set(videoio::CAP_PROP_BUFFERSIZE, 4096.0)?;
+    cap.set(videoio::CAP_PROP_BUFFERSIZE, 2048.0)?;
 
     if !cap.is_opened().unwrap() {
         return Err(anyhow::Error::msg("Unable to open stream"));
@@ -86,7 +85,7 @@ async fn capture_stream(
             break;
         }
         //TODO: run ml here and send(index, (original_frame, depth_frame)) over channel
-        tx.send((index, frame)).await?;
+        tx.send((index, frame.clone(), frame)).await?;
     }
 
     Ok(())
