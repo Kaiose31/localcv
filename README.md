@@ -35,6 +35,7 @@ COST: ~$4900\
 - [ ] create binding for C/C++ call to inference func.
 - [ ] display depth image with original in renderer.
 - [ ] compiled C/C++ binary with model and inference on GPU
+- [ ] benchmark execution time of the depth estimation algorithm
 - [ ] benchmark frame processing time, latency/num of devices 
 
 ## Benchmark
