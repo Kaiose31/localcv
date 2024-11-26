@@ -1,20 +1,24 @@
 use anyhow::Result;
 use localcv::ServerConfig;
-use opencv::core::CV_8U;
 use opencv::{highgui, prelude::*, videoio};
-
+use render::{combine_frames, convert_to_grayscale};
 use tokio::sync::mpsc;
 
-const NUM_DEVICES: usize = 1;
+mod render;
+
+const HEIGHT: i32 = 480;
+const WIDTH: i32 = 640;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let servers = ServerConfig::new(NUM_DEVICES as u8);
-    highgui::named_window("video capture", highgui::WINDOW_AUTOSIZE)?;
-    let (tx, mut rx) = mpsc::channel::<(usize, Mat)>(100);
+    let args: Vec<String> = std::env::args().collect();
+    let num_devices = args[1].parse::<usize>()?;
+    let servers = ServerConfig::new(num_devices, WIDTH, HEIGHT);
+    highgui::named_window_def("video display")?;
 
-    // capture_stream(servers.connections[0].to_string()).await?;
+    let (tx, mut rx) = mpsc::channel::<(usize, Mat)>(1000);
 
+    // start listeners
     let tasks: Vec<_> = servers
         .connections
         .iter()
@@ -25,24 +29,25 @@ async fn main() -> Result<()> {
         })
         .collect();
 
-    let mut frames: Vec<Option<Mat>> = vec![None; NUM_DEVICES];
+    let mut frames: Vec<Option<Mat>> = vec![None; num_devices];
+
+    //render
     loop {
         if let Some((index, frame)) = rx.recv().await {
             frames[index] = Some(frame);
         }
 
-        // Combine frames into a grid
         let mut grid = Mat::default();
-        combine_frames(&frames, &mut grid)?;
-        highgui::imshow("video capture", &grid)?;
+        combine_frames(&frames, &mut grid, HEIGHT, WIDTH)?;
+        highgui::imshow("video display", &grid)?;
         let key = highgui::wait_key(10)?;
         if key > 0 && key != 255 {
             break;
         }
     }
 
-    for task in tasks {
-        task.await?.expect("capturing video")
+    for task in tasks.into_iter() {
+        task.await?.expect("video capture");
     }
 
     Ok(())
@@ -53,10 +58,7 @@ async fn capture_stream(
     index: usize,
     tx: mpsc::Sender<(usize, Mat)>,
 ) -> Result<()> {
-    let mut cap = videoio::VideoCapture::from_file(
-        format!("udp://{}", stream).as_str(),
-        videoio::CAP_FFMPEG,
-    )?;
+    let mut cap = videoio::VideoCapture::from_file_def(format!("udp://{}", stream).as_str())?;
 
     if !cap.is_opened().unwrap() {
         return Err(anyhow::Error::msg("Unable to open stream"));
@@ -72,27 +74,10 @@ async fn capture_stream(
             eprintln!("Failed to read frame from stream: {}", stream);
             break;
         }
+        frame = convert_to_grayscale(&frame)?;
 
-        tx.send((index, frame)).await.unwrap();
+        tx.send((index, frame)).await?;
     }
-
-    Ok(())
-}
-
-fn combine_frames(frames: &[Option<Mat>], output: &mut Mat) -> Result<()> {
-    let mut frame_vec = opencv::core::Vector::<Mat>::new();
-
-    for frame in frames.iter() {
-        if let Some(frame) = frame {
-            frame_vec.push(frame.clone());
-        } else {
-            // Placeholder for empty frames
-            let placeholder = Mat::ones(480, 640, CV_8U)?.to_mat()?;
-            frame_vec.push(placeholder);
-        }
-    }
-
-    opencv::core::hconcat(&frame_vec, output)?;
 
     Ok(())
 }
