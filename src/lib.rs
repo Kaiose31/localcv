@@ -1,4 +1,19 @@
+use clap::Parser;
 use std::net::{Ipv4Addr, SocketAddrV4};
+
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+pub struct Args {
+    /// Number of devices
+    pub devices: usize,
+    /// Video stream width
+    #[arg(default_value_t = 640)]
+    pub width: i32,
+    /// Video stream height
+    #[arg(default_value_t = 480)]
+    pub height: i32,
+}
+
 #[derive(Debug, Clone)]
 pub struct ServerConfig {
     pub width: i32,
@@ -15,9 +30,5 @@ impl ServerConfig {
             width,
             height,
         }
-    }
-
-    pub fn get_num_devices(&self) -> usize {
-        self.connections.len()
     }
 }

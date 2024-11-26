@@ -1,22 +1,19 @@
 use anyhow::Result;
-use localcv::ServerConfig;
+use clap::Parser;
+use localcv::{Args, ServerConfig};
 use opencv::{highgui, prelude::*, videoio};
 use render::{combine_frames, convert_to_grayscale};
 use tokio::sync::mpsc;
 
 mod render;
 
-const HEIGHT: i32 = 480;
-const WIDTH: i32 = 640;
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    let args: Vec<String> = std::env::args().collect();
-    let num_devices = args[1].parse::<usize>()?;
-    let servers = ServerConfig::new(num_devices, WIDTH, HEIGHT);
-    highgui::named_window_def("video display")?;
-
-    let (tx, mut rx) = mpsc::channel::<(usize, Mat)>(1000);
+    let window_name = "video display";
+    let args = Args::parse();
+    let servers = ServerConfig::new(args.devices, args.width, args.height);
+    highgui::named_window_def(window_name)?;
+    let (tx, mut rx) = mpsc::channel::<(usize, Mat)>(100);
 
     // start listeners
     let tasks: Vec<_> = servers
@@ -29,23 +26,25 @@ async fn main() -> Result<()> {
         })
         .collect();
 
-    let mut frames: Vec<Option<Mat>> = vec![None; num_devices];
+    //TODO: record depth frames additionally.
+    let mut frames: Vec<Option<Mat>> = vec![None; args.devices];
 
-    //render
+    //start render loop
     loop {
         if let Some((index, frame)) = rx.recv().await {
             frames[index] = Some(frame);
         }
 
         let mut grid = Mat::default();
-        combine_frames(&frames, &mut grid, HEIGHT, WIDTH)?;
-        highgui::imshow("video display", &grid)?;
+        combine_frames(&frames, &mut grid, args.height, args.width)?;
+        highgui::imshow(window_name, &grid)?;
         let key = highgui::wait_key(10)?;
         if key > 0 && key != 255 {
             break;
         }
     }
 
+    //join all listeners
     for task in tasks.into_iter() {
         task.await?.expect("video capture");
     }
@@ -68,7 +67,6 @@ async fn capture_stream(
 
     loop {
         let mut frame = Mat::default();
-        cap.read(&mut frame)?;
 
         if !cap.read(&mut frame)? || frame.size()?.width == 0 {
             eprintln!("Failed to read frame from stream: {}", stream);
@@ -76,6 +74,7 @@ async fn capture_stream(
         }
         frame = convert_to_grayscale(&frame)?;
 
+        //TODO: run ml here and send(index, (original_frame, depth_frame)) over channel
         tx.send((index, frame)).await?;
     }
 

@@ -2,7 +2,8 @@ use anyhow::Result;
 use opencv::core::{Mat, MatExprTraitConst, Size};
 use opencv::imgproc;
 
-//Horizontally combine frame for display
+//Horizontally combine frame for display (idx, frame), (idx + 1, frame) ..
+//TODO: vertically combine (idx, frame) with (idx,depth_frame)
 pub fn combine_frames(
     frames: &[Option<Mat>],
     output: &mut Mat,
