@@ -7,6 +7,11 @@ use tokio::sync::mpsc;
 
 mod render;
 
+#[link(name = "depth", kind = "static")]
+extern "C" {
+    fn hello();
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let window_name = "video display";
