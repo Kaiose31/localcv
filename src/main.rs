@@ -18,7 +18,7 @@ async fn main() -> Result<()> {
     let args = Args::parse();
     let servers = ServerConfig::new(args.devices, args.width, args.height);
     highgui::named_window_def(window_name)?;
-    let (tx, mut rx) = mpsc::channel::<(usize, Mat)>(100);
+    let (tx, mut rx) = mpsc::channel::<(usize, Mat)>(4096);
 
     // start listeners
     let tasks: Vec<_> = servers
@@ -36,6 +36,7 @@ async fn main() -> Result<()> {
 
     //start render loop
     loop {
+        // This can be optimized to receive many from the buffer
         if let Some((index, frame)) = rx.recv().await {
             frames[index] = Some(frame);
         }
@@ -62,10 +63,14 @@ async fn capture_stream(
     index: usize,
     tx: mpsc::Sender<(usize, Mat)>,
 ) -> Result<()> {
-    let mut cap = videoio::VideoCapture::from_file(
-        format!("srt://{}?mode=listener", stream).as_str(),
+    let flags = capture_params();
+
+    let mut cap = videoio::VideoCapture::from_file_with_params(
+        format!("udp://{}", stream).as_str(),
         videoio::CAP_FFMPEG,
+        &flags,
     )?;
+    cap.set(videoio::CAP_PROP_BUFFERSIZE, 4096.0)?;
 
     if !cap.is_opened().unwrap() {
         return Err(anyhow::Error::msg("Unable to open stream"));
@@ -85,4 +90,13 @@ async fn capture_stream(
     }
 
     Ok(())
+}
+
+fn capture_params() -> opencv::core::Vector<i32> {
+    let mut flags = opencv::core::Vector::<i32>::new();
+    flags.push(videoio::CAP_PROP_OPEN_TIMEOUT_MSEC);
+    flags.push(50000);
+    flags.push(videoio::CAP_PROP_READ_TIMEOUT_MSEC);
+    flags.push(50000);
+    flags
 }
