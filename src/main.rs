@@ -7,10 +7,10 @@ use tokio::sync::mpsc;
 
 mod render;
 
-#[link(name = "depth", kind = "static")]
-extern "C" {
-    fn hello();
-}
+// #[link(name = "depth", kind = "static")]
+// extern "C" {
+//     fn hello();
+// }
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -62,7 +62,10 @@ async fn capture_stream(
     index: usize,
     tx: mpsc::Sender<(usize, Mat)>,
 ) -> Result<()> {
-    let mut cap = videoio::VideoCapture::from_file_def(format!("udp://{}", stream).as_str())?;
+    let mut cap = videoio::VideoCapture::from_file(
+        format!("srt://{}?mode=listener", stream).as_str(),
+        videoio::CAP_FFMPEG,
+    )?;
 
     if !cap.is_opened().unwrap() {
         return Err(anyhow::Error::msg("Unable to open stream"));

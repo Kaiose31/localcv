@@ -15,7 +15,7 @@ logging.basicConfig(filename=f"logs/{datetime.datetime.today().strftime('%Y-%m-%
 
 
 def video_paths(dir: Path, devices: int) -> tuple[List[str], List[str]]:
-    return ([os.path.join(dir, x) for x in os.listdir(dir)[:devices]], [f"udp://{HOST}:{port}" for port in range(5000, 5000 + devices)])
+    return ([os.path.join(dir, x) for x in os.listdir(dir)[:devices]], [f"srt://{HOST}:{port}?mode=caller" for port in range(5000, 5000 + devices)])
 
 
 def stream_video(vid, url, res):
@@ -48,7 +48,8 @@ def stream_video(vid, url, res):
 
     try:
         res = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
-        logger.debug(res.stderr)
+        logger.debug(f"stdout: {res.stdout}")
+        logger.debug(f"stderr: {res.stderr}")
     except Exception as e:
         logger.error(f"An unexpected error occurred: {e}")
 
