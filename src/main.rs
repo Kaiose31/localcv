@@ -64,16 +64,14 @@ async fn capture_stream(
     }
 
     println!("Started capturing stream: {}", stream);
-
     loop {
         let mut frame = Mat::default();
-
-        if !cap.read(&mut frame)? || frame.size()?.width == 0 {
-            eprintln!("Failed to read frame from stream: {}", stream);
+        cap.read(&mut frame)?;
+        frame = convert_to_grayscale(&frame)?;
+        if frame.empty() {
+            eprintln!("No frame received");
             break;
         }
-        frame = convert_to_grayscale(&frame)?;
-
         //TODO: run ml here and send(index, (original_frame, depth_frame)) over channel
         tx.send((index, frame)).await?;
     }
