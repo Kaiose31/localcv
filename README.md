@@ -61,7 +61,7 @@ Performance metrics:
     !!equal length videos
     !!assume perfect network
     !!decode latency out of scope
-    measure decode latency, depth estimation latency, total latency
+    measure depth estimation latency
     resolution: 400x400, 640x480, 1280x720, 1920x1080
     througput fps: 10, 20, 30, 60
     tasks: 1-16

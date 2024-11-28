@@ -1,7 +1,7 @@
 #!/bin/bash
-WIDTH="640"
-HEIGHT="480"
-python3 scripts/sender.py "$1" "$WIDTH" "$HEIGHT" &>/dev/null &
+WIDTH="1920"
+HEIGHT="1080"
+python3 scripts/sender.py "$1" "$WIDTH" "$HEIGHT" "$2" &>/dev/null &
 PYTHON_PID=$!
 cleanup() {
     echo "Terminating Sender"
