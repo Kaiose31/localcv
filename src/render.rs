@@ -2,6 +2,19 @@ use anyhow::Result;
 use opencv::core::{Mat, MatExprTraitConst, Vector};
 use opencv::imgproc;
 
+pub trait ToGrayScale {
+    fn convert_to_grayscale(&mut self) -> Result<()>;
+}
+
+impl ToGrayScale for Mat {
+    fn convert_to_grayscale(&mut self) -> Result<()> {
+        let mut gray_frame = Mat::default();
+        imgproc::cvt_color(self, &mut gray_frame, imgproc::COLOR_BGR2GRAY, 0)?;
+        *self = gray_frame;
+        Ok(())
+    }
+}
+
 pub fn combine_frames(
     frames: &[Option<(Mat, Mat)>],
     output: &mut Mat,
@@ -34,10 +47,4 @@ pub fn combine_frames(
 
     opencv::core::hconcat(&frame_vec, output)?;
     Ok(())
-}
-
-pub fn convert_to_grayscale(input_frame: &Mat) -> Result<Mat> {
-    let mut gray_frame = Mat::default();
-    imgproc::cvt_color(input_frame, &mut gray_frame, imgproc::COLOR_BGR2GRAY, 0)?;
-    Ok(gray_frame)
 }

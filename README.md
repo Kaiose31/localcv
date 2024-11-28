@@ -6,9 +6,15 @@ brew install ffmpeg
 brew install opencv
 ```
 
-#Build
+# Build
 ```
 cargo build
+```
+
+# Run demo
+```
+chmod +x run.sh
+./run.sh
 ```
 
 ## Research: 
@@ -29,14 +35,14 @@ IRL requires reverse engineering some hardware to fetch their video streams.
 1080p stream requires ~ 5 Mb/s\
 100 Streams ~ 500 Mb/s\
 
-AI Server Specs (Target): \
+AI Server Specs (Target Machine): \
 FLOPS: ~330 TFLOPS  \
 GPU: 4x RTX 4090 \
 GPU MEMORY: 48GB @ 21GB/s\
 MEMORY: 128GB @ 200 GB/s\
 CPU: 32 Core AMD EPYC\
 NETWORK: WIFI 6E @ 9.6 GB/s\
-COST: ~$4900\
+
 
 ## TODO: 
 - [x] single thread SRT server capable of accepting multiple connections. [Baseline implementation](https://github.com/Haivision/srt)
@@ -46,10 +52,20 @@ COST: ~$4900\
 - [x] display depth image with original in renderer.
 - [ ] compiled C/C++ binary with model and inference on GPU
 - [ ] benchmark execution time of the depth estimation algorithm
-- [ ] benchmark frame processing time, latency/num of devices 
+- [ ] benchmark fps, latency per frame while varying resolution and number of streams
 
 ## Benchmark
 Use ffmpeg with script to create video streams that from data that hit the target server.
+
+Performance metrics: 
+    !!equal length videos
+    !!assume perfect network
+    !!decode latency out of scope
+    measure decode latency, depth estimation latency, total latency
+    resolution: 400x400, 640x480, 1280x720, 1920x1080
+    througput fps: 10, 20, 30, 60
+    tasks: 1-16
+    cores: 1-8
 
 
 

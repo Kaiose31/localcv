@@ -6,6 +6,9 @@ use std::net::{Ipv4Addr, SocketAddrV4};
 pub struct Args {
     /// Number of devices
     pub devices: usize,
+    ///Flag to enable/disable video stream rendering
+    #[arg(long, short, action)]
+    pub render: bool,
     /// Video stream width
     #[arg(default_value_t = 640)]
     pub width: i32,
@@ -18,6 +21,7 @@ pub struct Args {
 pub struct ServerConfig {
     pub width: i32,
     pub height: i32,
+    pub ports: Vec<u16>,
     pub connections: Vec<SocketAddrV4>,
 }
 
@@ -29,6 +33,7 @@ impl ServerConfig {
             connections: ports.iter().map(|x| SocketAddrV4::new(host, *x)).collect(),
             width,
             height,
+            ports,
         }
     }
 }
