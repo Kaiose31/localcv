@@ -18,7 +18,7 @@ def video_paths(dir: Path, devices: int) -> tuple[List[str], List[str]]:
     return ([os.path.join(dir, x) for x in os.listdir(dir)[:devices]], [f"udp://@{HOST}:{port}" for port in range(5000, 5000 + devices)])
 
 
-def stream_video(vid, url, res, fps):
+def stream_video(vid, url, res, fps, secs):
     command = [
         "ffmpeg",
         "-re",
@@ -26,6 +26,8 @@ def stream_video(vid, url, res, fps):
         vid,
         "-r",
         fps,
+        "-t",
+        secs,
         "-vf",
         f"scale={res},format=gray",
         "-pix_fmt",
@@ -61,11 +63,12 @@ if __name__ == "__main__":
     width = sys.argv[2]
     height = sys.argv[3]
     fps = sys.argv[4]
+    secs = sys.argv[5]
     res = width + "x" + height
     vids, urls = video_paths(Path("data"), int(devices))
     procs = []
     for vid, url in zip(vids, urls):
-        proc = Process(target=stream_video, args=(vid, url, res, fps))
+        proc = Process(target=stream_video, args=(vid, url, res, fps, secs))
         procs.append(proc)
         proc.start()
 

@@ -1,6 +1,8 @@
+use anyhow::Result;
 use clap::Parser;
+use opencv::core::Mat;
 use std::net::{Ipv4Addr, SocketAddrV4};
-
+use tokio::sync::mpsc;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Args {
@@ -35,5 +37,32 @@ impl ServerConfig {
             height,
             ports,
         }
+    }
+}
+
+pub struct StreamData(pub usize, pub Mat, pub Mat);
+
+#[derive(Debug, Clone)]
+pub enum StreamHandler {
+    Render { tx: mpsc::Sender<StreamData> },
+    NoRender,
+}
+
+impl StreamHandler {
+    pub fn new(render: bool, buffer_size: usize) -> (Self, Option<mpsc::Receiver<StreamData>>) {
+        if render {
+            let (tx, rx) = mpsc::channel::<StreamData>(buffer_size);
+
+            (StreamHandler::Render { tx }, Some(rx))
+        } else {
+            (StreamHandler::NoRender, None)
+        }
+    }
+
+    pub async fn send(&self, data: StreamData) -> Result<()> {
+        if let Self::Render { tx } = self {
+            tx.send(data).await?;
+        }
+        Ok(())
     }
 }
