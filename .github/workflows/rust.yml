@@ -13,9 +13,22 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
+    
     steps:
     - uses: actions/checkout@v4
+
+        # Install LLVM and dependencies required by clang-sys
+    - name: Install LLVM
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y llvm clang libclang-dev
+
+    # Set environment variables to help the build script find LLVM tools
+    - name: Set LLVM environment variables
+      run: |
+        echo "LLVM_CONFIG_PATH=$(which llvm-config)" >> $GITHUB_ENV
+        echo "LIBCLANG_PATH=/usr/lib/llvm-12/lib" >> $GITHUB_ENV
+        
     - name: Build
       run: cargo build --verbose
     - name: Run tests
