@@ -18,15 +18,18 @@ jobs:
     - uses: actions/checkout@v4
 
         # Install LLVM and dependencies required by clang-sys
-    - name: Install LLVM
+    # Install LLVM, Clang, and libclang-dev
+    - name: Install LLVM and Clang
       run: |
         sudo apt-get update
         sudo apt-get install -y llvm clang libclang-dev
 
-    # Set environment variables to help the build script find LLVM tools
+    # Set environment variables for LLVM
     - name: Set LLVM environment variables
       run: |
+        # Find llvm-config and set it in the environment
         echo "LLVM_CONFIG_PATH=$(which llvm-config)" >> $GITHUB_ENV
+        # Set the correct path for libclang.so
         echo "LIBCLANG_PATH=/usr/lib/llvm-12/lib" >> $GITHUB_ENV
         
     - name: Build
