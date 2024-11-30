@@ -71,9 +71,8 @@ async fn main() -> Result<()> {
 }
 
 async fn capture_stream(stream: String, index: usize, handler: StreamHandler) -> Result<()> {
-    let mut writer = Writer::from_path(format!("outputs/{}.csv", index))?;
-    writer.write_record(["frame_id", "algorithm_latency(μs)"])?;
-
+    // let mut writer = Writer::from_path(format!("outputs/{}.csv", index))?;
+    // writer.write_record(["frame_id", "total_latency(μs)", "algorithm_latency(μs)"])?;
     let mut cap = videoio::VideoCapture::from_file_with_params(
         format!("udp://@{}?overrun_nonfatal=1&fifo_size=50000000", stream).as_str(),
         videoio::CAP_ANY,
@@ -82,15 +81,23 @@ async fn capture_stream(stream: String, index: usize, handler: StreamHandler) ->
             50000,
             videoio::CAP_PROP_READ_TIMEOUT_MSEC,
             1000,
-            videoio::CAP_PROP_HW_ACCELERATION,
-            videoio::VIDEO_ACCELERATION_ANY,
         ]),
     )?;
 
     println!("Started capturing stream:{}", stream);
     let mut frame = Mat::default();
 
+    let mut writer = None;
+    if let StreamHandler::NoRender = &handler {
+        writer = Some(Writer::from_path(format!("outputs/{}.csv", index))?);
+        if let Some(writer) = writer.as_mut() {
+            writer.write_record(["frame_id", "total_latency(μs)", "algorithm_latency(μs)"])?;
+        }
+    }
+
+    //process each frame
     for iter in 0.. {
+        let p_latency = Instant::now();
         if !cap
             .read(&mut frame)
             .context("failed to read video frame from stream")?
@@ -108,11 +115,21 @@ async fn capture_stream(stream: String, index: usize, handler: StreamHandler) ->
         //TODO: run ml here and send(index, (original_frame, depth_frame)) over channel
         let latency = start.elapsed();
 
-        writer.write_record([iter.to_string(), latency.as_micros().to_string()])?;
-        let data = StreamData(index, frame.clone(), frame.clone());
-        handler.send(data).await?
+        if let Some(writer) = writer.as_mut() {
+            writer.write_record([
+                iter.to_string(),
+                p_latency.elapsed().as_micros().to_string(),
+                latency.as_micros().to_string(),
+            ])?;
+        }
+
+        handler
+            .send(StreamData(index, frame.clone(), frame.clone()))
+            .await?
     }
 
-    writer.flush()?;
+    if let Some(writer) = writer.as_mut() {
+        writer.flush()?;
+    }
     Ok(())
 }
