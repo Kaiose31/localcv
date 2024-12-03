@@ -1,16 +1,25 @@
 use anyhow::Result;
-use opencv::core::{Mat, MatExprTraitConst, Vector};
+use opencv::core::{Mat, MatExprTraitConst, MatTraitConst, Vector};
 use opencv::imgproc;
 
-pub trait ToGrayScale {
+#[link(name = "depth", kind = "static")]
+extern "C" {
+    fn test_inference(data: *const f32, size: i32);
+}
+pub trait Process {
     fn convert_to_grayscale(&mut self) -> Result<()>;
+    fn inference(&mut self) -> Result<()>;
 }
 
-impl ToGrayScale for Mat {
+impl Process for Mat {
     fn convert_to_grayscale(&mut self) -> Result<()> {
         let mut gray_frame = Mat::default();
         imgproc::cvt_color(self, &mut gray_frame, imgproc::COLOR_BGR2GRAY, 0)?;
         *self = gray_frame;
+        Ok(())
+    }
+
+    fn inference(&mut self) -> Result<()> {
         Ok(())
     }
 }

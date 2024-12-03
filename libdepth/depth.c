@@ -2,11 +2,12 @@
 
 /// TODO: Change this to inference function
 // inputs: Row major array of video frame, size n
-//  o
-void hello()
+//
+void test_inference(float *data, int size)
 {
-    while (1)
+
+    for (int i = 0; i <= size * size; i++)
     {
-        printf("HELLO from C");
+        printf("%d", data[i]);
     }
 }

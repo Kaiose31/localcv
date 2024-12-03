@@ -3,18 +3,13 @@ use clap::Parser;
 use csv::Writer;
 use localcv::{Args, ServerConfig, StreamData, StreamHandler};
 use opencv::{core::Vector, highgui, prelude::*, videoio};
-use render::{combine_frames, ToGrayScale};
+use render::{combine_frames, Process};
 use std::time::Instant;
 use tokio::sync::mpsc;
 mod render;
 
 //Performance Params
 const BUFFER_SIZE: usize = 100;
-
-#[link(name = "depth", kind = "static")]
-extern "C" {
-    fn hello();
-}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -111,6 +106,7 @@ async fn capture_stream(stream: String, index: usize, handler: StreamHandler) ->
             .convert_to_grayscale()
             .context("failed to convert video stream")?;
         //TODO: run ml here and send(index, (original_frame, depth_frame)) over channel
+        frame.inference().context("failed inference")?;
         let latency = start.elapsed();
 
         if let Some(writer) = writer.as_mut() {
