@@ -3,7 +3,7 @@ use clap::Parser;
 use csv::Writer;
 use localcv::{Args, ServerConfig, StreamData, StreamHandler};
 use opencv::{core::Vector, highgui, prelude::*, videoio};
-use render::{combine_frames, ToGrayScale};
+use render::{combine_frames, Process};
 use std::time::Instant;
 use tokio::sync::mpsc;
 mod render;
@@ -11,17 +11,8 @@ mod render;
 //Performance Params
 const BUFFER_SIZE: usize = 100;
 
-#[link(name = "depth", kind = "static")]
-extern "C" {
-    fn inference() -> i32;
-}
-
 #[tokio::main]
 async fn main() -> Result<()> {
-    unsafe {
-        let r = inference();
-        println!("{}", r);
-    }
     let args = Args::parse();
     let servers = ServerConfig::new(args.devices, args.width, args.height);
 
@@ -111,10 +102,9 @@ async fn capture_stream(stream: String, index: usize, handler: StreamHandler) ->
         println!("stream:{} frame:{}", stream, iter);
 
         let start = Instant::now();
-        frame
-            .convert_to_grayscale()
-            .context("failed to convert video stream")?;
-        //TODO: run ml here and send(index, (original_frame, depth_frame)) over channel
+        let mut depth_frame = frame.run_ml()?;
+        frame.convert_to_grayscale()?;
+        depth_frame.convert_to_grayscale()?;
         let latency = start.elapsed();
 
         if let Some(writer) = writer.as_mut() {
@@ -126,7 +116,7 @@ async fn capture_stream(stream: String, index: usize, handler: StreamHandler) ->
         }
 
         handler
-            .send(StreamData(index, frame.clone(), frame.clone()))
+            .send(StreamData(index, frame.clone(), depth_frame))
             .await?
     }
 

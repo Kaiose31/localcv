@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.27.9)
 project(LibDepth CXX OBJCXX)
-add_library(depth STATIC preprocessing.cpp depth.mm)
+add_library(depth STATIC depth.mm)
 
 set_target_properties(depth PROPERTIES
     CXX_STANDARD 17
@@ -18,6 +18,7 @@ target_link_libraries(depth PRIVATE
     /opt/homebrew/opt/opencv/lib/libopencv_core.dylib
     /opt/homebrew/opt/opencv/lib/libopencv_imgproc.dylib
     /opt/homebrew/opt/opencv/lib/libopencv_imgcodecs.dylib
+    /opt/homebrew/opt/opencv/lib/libopencv_highgui.dylib
     "-framework Foundation"
     "-framework CoreML"
 )

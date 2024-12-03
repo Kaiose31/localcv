@@ -44,11 +44,11 @@
     }
 
     // Check if the compiled model exists
-    NSURL *compiledModelURL = [NSURL fileURLWithPath:@"/Users/adityanayak/Depth-Anything-V2/depth_anything_v2.mlpackage/Data/com.apple.CoreML/model.mlmodelc"];
+    NSURL *compiledModelURL = [NSURL fileURLWithPath:@"models/depth_anything_v2.mlpackage/Data/com.apple.CoreML/model.mlmodelc"];
     
     if (![compiledModelURL checkResourceIsReachableAndReturnError:&error]) {
         // If the compiled model doesn't exist, compile it (this happens only once)
-        NSURL *modelURL = [NSURL fileURLWithPath:@"/Users/adityanayak/Depth-Anything-V2/depth_anything_v2.mlpackage/Data/com.apple.CoreML/model.mlmodel"];
+        NSURL *modelURL = [NSURL fileURLWithPath:@"models/depth_anything_v2.mlpackage/Data/com.apple.CoreML/model.mlmodel"];
         compiledModelURL = [MLModel compileModelAtURL:modelURL error:&error];
         
         if (error) {
