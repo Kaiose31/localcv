@@ -3,13 +3,14 @@
 
 extern "C" float* processImage(const char* imagePath, int& dataSize);
 extern "C" void processDepthMap(float* depthData, int height, int width);
+extern "C" int inference();
 
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
+int inference(){ 
+ @autoreleasepool {
         NSError *error = nil;
 
         // Path to the image file
-        const char* imagePath = "/Users/adityanayak/Depth-Anything-V2/assets/examples/demo01.jpg";
+        const char* imagePath = "libdepth/interior-design-of-a-house-1571460.jpg";
 
         // Get the 1D flattened data from the C++ function
         int dataSize;
@@ -41,7 +42,7 @@ int main(int argc, const char * argv[]) {
         }
 
         // Load the MLModel from .mlpackage
-        NSURL *modelURL = [NSURL fileURLWithPath:@"/Users/adityanayak/Depth-Anything-V2/depth_anything_v2.mlpackage/Data/com.apple.CoreML/model.mlmodel"];
+        NSURL *modelURL = [NSURL fileURLWithPath:@"models/depth_anything_v2.mlpackage"];
         NSURL *compiledModelURL = [MLModel compileModelAtURL:modelURL error:&error];
 
         if (error) {

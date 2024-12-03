@@ -13,11 +13,15 @@ const BUFFER_SIZE: usize = 100;
 
 #[link(name = "depth", kind = "static")]
 extern "C" {
-    fn hello();
+    fn inference() -> i32;
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    unsafe {
+        let r = inference();
+        println!("{}", r);
+    }
     let args = Args::parse();
     let servers = ServerConfig::new(args.devices, args.width, args.height);
 

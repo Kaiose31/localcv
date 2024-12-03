@@ -2,11 +2,14 @@
 #include <iostream>
 
 // C++ function to process an image
-extern "C" float* processImage(const char* imagePath, int& dataSize) {
-    try {
+extern "C" float *processImage(const char *imagePath, int &dataSize)
+{
+    try
+    {
         // Load the image
         cv::Mat image = cv::imread(imagePath, cv::IMREAD_COLOR);
-        if (image.empty()) {
+        if (image.empty())
+        {
             std::cerr << "Failed to load image: " << imagePath << std::endl;
             return nullptr;
         }
@@ -25,18 +28,20 @@ extern "C" float* processImage(const char* imagePath, int& dataSize) {
 
         // Flatten the CHW image to a 1D array
         dataSize = chw.total();
-        float* flattenedData = new float[dataSize];
+        float *flattenedData = new float[dataSize];
         std::memcpy(flattenedData, chw.ptr<float>(), dataSize * sizeof(float));
 
         return flattenedData;
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         std::cerr << "Error processing image: " << e.what() << std::endl;
         return nullptr;
     }
 }
 
-
-extern "C" void processDepthMap(float* depthData, int height, int width) {
+extern "C" void processDepthMap(float *depthData, int height, int width)
+{
     // Step 1: Convert 1D array to cv::Mat
     cv::Mat depthMap(height, width, CV_32F, depthData);
 
@@ -53,7 +58,5 @@ extern "C" void processDepthMap(float* depthData, int height, int width) {
 
     // Step 5: Save or display the result
     cv::imwrite("depth_map_color.jpg", depthMapColor);
-    cv::imshow("Depth Map", depthMapColor);
-
+    // cv::imshow("Depth Map", depthMapColor);
 }
-
