@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
-#import "ModelManager.h"
+#import <CoreML/CoreML.h>
+#import "ModelManager.mm"
 
 extern "C" float* processImage(const char* imagePath, int& dataSize);
 extern "C" void processDepthMap(float* depthData, int height, int width);
@@ -7,11 +8,11 @@ extern "C" void processDepthMap(float* depthData, int height, int width);
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
         NSError *error = nil;
-        NSLog(@"gg1");
+       
         // Access the preloaded model
         ModelManager *modelManager = [ModelManager sharedInstance];
         MLModel *model = modelManager.model;
-        NSLog(@"gg2");
+       
         if (!model) {
             NSLog(@"Model is not preloaded.");
             return -1;
@@ -57,10 +58,10 @@ int main(int argc, const char * argv[]) {
             NSLog(@"Failed to initialize inputFeatureProvider: %@", error.localizedDescription);
             return -1;
         }
-        NSLog(@"gg3");
+       
         // Run inference
         id<MLFeatureProvider> output = [model predictionFromFeatures:inputFeatureProvider error:&error];
-        NSLog(@"gg4");
+        
         if (error) {
             NSLog(@"Failed to run inference: %@", error.localizedDescription);
             return -1;
