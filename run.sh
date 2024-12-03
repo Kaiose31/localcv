@@ -1,7 +1,7 @@
 #!/bin/bash
 WIDTH="640"
 HEIGHT="480"
-DURATION="120"
+DURATION="60"
 FPS="10"
 
 python3 scripts/sender.py "$1" "$WIDTH" "$HEIGHT" "$FPS" "$DURATION" &>/dev/null &
@@ -13,4 +13,4 @@ cleanup() {
 
 trap cleanup EXIT
 cargo build -r
-OPENCV_FFMPEG_LOGLEVEL=0 ./target/release/localcv "$1" "$WIDTH" "$HEIGHT"
+OPENCV_FFMPEG_LOGLEVEL=0 ./target/release/localcv "$1" "$WIDTH" "$HEIGHT" -r

@@ -11,10 +11,10 @@ mod render;
 //Performance Params
 const BUFFER_SIZE: usize = 100;
 
-// #[link(name = "depth", kind = "static")]
-// extern "C" {
-//     fn hello();
-// }
+#[link(name = "depth", kind = "static")]
+extern "C" {
+    fn hello();
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -71,8 +71,7 @@ async fn main() -> Result<()> {
 }
 
 async fn capture_stream(stream: String, index: usize, handler: StreamHandler) -> Result<()> {
-    // let mut writer = Writer::from_path(format!("outputs/{}.csv", index))?;
-    // writer.write_record(["frame_id", "total_latency(μs)", "algorithm_latency(μs)"])?;
+    //Capture Video stream on netork socket
     let mut cap = videoio::VideoCapture::from_file_with_params(
         format!("udp://@{}?overrun_nonfatal=1&fifo_size=50000000", stream).as_str(),
         videoio::CAP_ANY,
@@ -86,7 +85,6 @@ async fn capture_stream(stream: String, index: usize, handler: StreamHandler) ->
 
     println!("Started capturing stream:{}", stream);
     let mut frame = Mat::default();
-
     let mut writer = None;
     if let StreamHandler::NoRender = &handler {
         writer = Some(Writer::from_path(format!("outputs/{}.csv", index))?);
