@@ -1,6 +1,6 @@
 #!/bin/bash
-WIDTH="518"
-HEIGHT="518"
+WIDTH="640"
+HEIGHT="480"
 DURATION="60"
 FPS="10"
 
