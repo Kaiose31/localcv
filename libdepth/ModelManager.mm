@@ -33,15 +33,14 @@
     return self;
 }
 
-// Preload the model, compile it if needed
 - (void)preloadModel {
     NSError *error = nil;
 
     // Skip loading if the model is already loaded in memory
-    if (self.model != nil) {
-        NSLog(@"Model is already loaded into memory.");
-        return; // Skip loading if the model is already in memory
-    }
+    // if (self.model != nil) {
+    //     NSLog(@"Model is already loaded into memory.");
+    //     return; // Skip loading if the model is already in memory
+    // }
 
     // Check if the compiled model exists
     NSURL *compiledModelURL = [NSURL fileURLWithPath:@"models/depth_anything_v2.mlpackage/Data/com.apple.CoreML/model.mlmodelc"];
@@ -56,18 +55,21 @@
             return;
         }
         
-        [[NSFileManager defaultManager] copyItemAtURL:compiledModelURL toURL:[NSURL fileURLWithPath:@"depth_anything_v2.mlpackage/Data/com.apple.CoreML/model.mlmodelc"] error:&error];
+        [[NSFileManager defaultManager] copyItemAtURL:compiledModelURL toURL:[NSURL fileURLWithPath:@"models/depth_anything_v2.mlpackage/Data/com.apple.CoreML/model.mlmodelc"] error:&error];
     }
-    
-    // Now, load the compiled model
-    self.model = [MLModel modelWithContentsOfURL:compiledModelURL error:&error];
+
+    // Create model configuration to specify compute units
+    MLModelConfiguration *config = [[MLModelConfiguration alloc] init];
+    config.computeUnits = MLComputeUnitsAll; // Use Neural Engine (NPU), GPU, or CPU as needed
+
+    // Now, load the compiled model with the configuration
+    self.model = [MLModel modelWithContentsOfURL:compiledModelURL configuration:config error:&error];
     
     if (error) {
         NSLog(@"Failed to load the compiled model: %@", error.localizedDescription);
         return;
     }
     
-    NSLog(@"Model preloaded successfully.");
 }
 
 // Method to clear the model from memory
