@@ -1,8 +1,7 @@
-use std::slice;
-
 use anyhow::Result;
 use opencv::core::{Mat, MatExprTraitConst, MatTraitConst, MatTraitConstManual, Size, Vector};
 use opencv::imgproc;
+use std::slice;
 
 #[link(name = "depth", kind = "static")]
 extern "C" {
@@ -10,12 +9,12 @@ extern "C" {
 }
 
 pub trait Process {
-    fn convert_to_grayscale(&mut self) -> Result<()>;
+    fn to_grayscale(&mut self) -> Result<()>;
     fn run_ml(&self) -> Result<Mat>;
 }
 
 impl Process for Mat {
-    fn convert_to_grayscale(&mut self) -> Result<()> {
+    fn to_grayscale(&mut self) -> Result<()> {
         let mut gray_frame = Mat::default();
         imgproc::cvt_color(self, &mut gray_frame, imgproc::COLOR_BGR2GRAY, 0)?;
         *self = gray_frame;
@@ -39,8 +38,9 @@ impl Process for Mat {
 
         let mut chw = Mat::default();
         opencv::core::vconcat(&channels, &mut chw)?;
-        let flattened_data: Vec<f32> = chw.data_typed::<f32>()?.to_vec();
-        let mut depth_frame = Mat::default();
+        let flattened_data = chw.data_typed::<f32>()?;
+
+        let depth_frame;
         unsafe {
             let depth = inference(flattened_data.as_ptr());
             if depth.is_null() {

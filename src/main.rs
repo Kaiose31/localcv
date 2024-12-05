@@ -102,9 +102,10 @@ async fn capture_stream(stream: String, index: usize, handler: StreamHandler) ->
         println!("stream:{} frame:{}", stream, iter);
 
         let start = Instant::now();
+
         let mut depth_frame = frame.run_ml()?;
-        frame.convert_to_grayscale()?;
-        depth_frame.convert_to_grayscale()?;
+        depth_frame.to_grayscale()?;
+        frame.to_grayscale()?;
         let latency = start.elapsed();
 
         if let Some(writer) = writer.as_mut() {

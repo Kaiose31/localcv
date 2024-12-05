@@ -1,6 +1,6 @@
 #!/bin/bash
-WIDTH="640"
-HEIGHT="480"
+WIDTH="1920"
+HEIGHT="1080"
 DURATION="60"
 FPS="10"
 
@@ -13,4 +13,4 @@ cleanup() {
 
 trap cleanup EXIT
 cargo build -r
-OPENCV_FFMPEG_LOGLEVEL=0 ./target/release/localcv "$1" "$WIDTH" "$HEIGHT" -r
+OPENCV_FFMPEG_LOGLEVEL=0 ./target/release/localcv "$1" "$WIDTH" "$HEIGHT"

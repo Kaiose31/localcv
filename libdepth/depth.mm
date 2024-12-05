@@ -6,6 +6,7 @@ extern "C" float * inference(float *imageData);
 
 float * inference(float *imageData){
      @autoreleasepool {
+
         NSError *error = nil;
        
         // Access the preloaded model
@@ -46,7 +47,6 @@ float * inference(float *imageData){
         if (error) {
             NSLog(@"Failed to initialize inputFeatureProvider: %@", error.localizedDescription);
         }
-       
         // Run inference
         id<MLFeatureProvider> output = [model predictionFromFeatures:inputFeatureProvider error:&error];
         
