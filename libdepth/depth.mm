@@ -11,6 +11,7 @@ float * inference(float *imageData){
        
         // Access the preloaded model
         ModelManager *modelManager = [ModelManager sharedInstance];
+        [modelManager preloadModel];
         MLModel *model = modelManager.model;
        
         if (!model) {

@@ -37,10 +37,9 @@
     NSError *error = nil;
 
     // Skip loading if the model is already loaded in memory
-    // if (self.model != nil) {
-    //     NSLog(@"Model is already loaded into memory.");
-    //     return; // Skip loading if the model is already in memory
-    // }
+    if (self.model != nil) {
+        return; // Skip loading if the model is already in memory
+    }
 
     // Check if the compiled model exists
     NSURL *compiledModelURL = [NSURL fileURLWithPath:@"models/depth_anything_v2.mlpackage/Data/com.apple.CoreML/model.mlmodelc"];
