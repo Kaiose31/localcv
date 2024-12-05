@@ -62,6 +62,7 @@ Performance metrics:
     !!assume perfect network
     measure depth estimation latency
     sustained performance (parallel vs serial)
+    roofline model
     resolution: 400x400, 640x480, 1280x720, 1920x1080
     througput fps: 10, 20, 30, 60
     tasks: 1-16

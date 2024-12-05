@@ -102,11 +102,10 @@ async fn capture_stream(stream: String, index: usize, handler: StreamHandler) ->
         println!("stream:{} frame:{}", stream, iter);
 
         let start = Instant::now();
-        frame
-            .convert_to_grayscale()
-            .context("failed to convert video stream")?;
-        //TODO: run ml here and send(index, (original_frame, depth_frame)) over channel
-        frame.inference().context("failed inference")?;
+
+        let mut depth_frame = frame.run_ml()?;
+        depth_frame.to_grayscale()?;
+        frame.to_grayscale()?;
         let latency = start.elapsed();
 
         if let Some(writer) = writer.as_mut() {
@@ -118,7 +117,7 @@ async fn capture_stream(stream: String, index: usize, handler: StreamHandler) ->
         }
 
         handler
-            .send(StreamData(index, frame.clone(), frame.clone()))
+            .send(StreamData(index, frame.clone(), depth_frame))
             .await?
     }
 
