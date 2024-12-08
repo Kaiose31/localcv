@@ -1,6 +1,6 @@
 # localcv 
 
-Real-time Parallel and Distributed 
+Real-time Parallel and Distributed Depth Estimation for Vision Systems
 # Prerequisites (for building from source)
 1. [ffmpeg 7.1+](https://ffmpeg.org/)
 2. [OpenCV 4.10+](https://opencv.org/)
