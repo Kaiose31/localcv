@@ -1,14 +1,13 @@
 use anyhow::{Context, Result};
 use clap::Parser;
 use csv::Writer;
-use localcv::{Args, ServerConfig, StreamData, StreamHandler};
+use localcv::{Args, Process, ServerConfig, StreamData, StreamHandler};
 use opencv::{core::Vector, highgui, prelude::*, videoio};
-use render::{combine_frames, Process};
+use render::combine_frames;
 use std::time::Instant;
 use tokio::sync::mpsc;
 mod render;
 
-//Performance Params
 const BUFFER_SIZE: usize = 100;
 
 #[tokio::main]
@@ -16,6 +15,7 @@ async fn main() -> Result<()> {
     let args = Args::parse();
     let servers = ServerConfig::new(args.devices, args.width, args.height);
 
+    //Initialize Message Passing Channel
     let (tx, mut rx) = mpsc::channel::<StreamData>(BUFFER_SIZE);
     let handler = if args.render {
         StreamHandler::Render { tx }
@@ -23,6 +23,7 @@ async fn main() -> Result<()> {
         StreamHandler::NoRender
     };
 
+    //Spawn child threads
     println!("Starting Stream listeners on {:?}", servers.ports);
     let tasks: Vec<_> = servers
         .connections
@@ -57,7 +58,7 @@ async fn main() -> Result<()> {
         StreamHandler::NoRender => (),
     }
 
-    //join all listeners
+    //join all listeners (synchronization)
     for task in tasks.into_iter() {
         task.await??;
     }
@@ -65,6 +66,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
+//Thread function
 async fn capture_stream(stream: String, index: usize, handler: StreamHandler) -> Result<()> {
     //Capture Video stream on netork socket
     let mut cap = videoio::VideoCapture::from_file_with_params(
@@ -102,7 +104,7 @@ async fn capture_stream(stream: String, index: usize, handler: StreamHandler) ->
         println!("stream:{} frame:{}", stream, iter);
 
         let start = Instant::now();
-
+        //Run Inference
         let mut depth_frame = frame.run_ml()?;
         depth_frame.to_grayscale()?;
         frame.to_grayscale()?;
