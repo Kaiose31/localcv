@@ -1,72 +1,30 @@
 # localcv 
 
-# Installation:
-```
-brew install ffmpeg
-brew install opencv
-```
-
-# Build
-```
-cargo build
-```
-
-# Run demo
-```
-chmod +x run.sh
-./run.sh
-```
-
-## Research: 
-1. Current stack: can run low powered hardware with simple algorithms, cant run anything above 8Gflops. Requires cloud processing for heavy computation,aggregation,user management, which means connecting to internet and maybe violating privacy. No Iot should need to connect to the internet. Using local AI server, we move all computation to an optimized GPU env while handling storage,aggregation and management on the local network.
-
-2. Ideal solution is open source software that can be run with few steps, provides interface to connect video devices and run any cv task on them. Additionally, provide video archiving, search, browsing etc in the future.
-IRL requires reverse engineering some hardware to fetch their video streams.
-
-3. In the project,  we demonstrate the viability and security of this solution over traditional IOT by running a local network communication and inference stack which is massively parallelized. We achieve performance higher than 1Gflop per device on depth estimation and plot latency over number of connected devices.
+Real-time Parallel and Distributed 
+# Prerequisites (for building from source)
+1. [ffmpeg 7.1+](https://ffmpeg.org/)
+2. [OpenCV 4.10+](https://opencv.org/)
+3. [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
+4. Python 3.8+ 
+5. [Xcode CoreML tools](https://apple.github.io/coremltools/docs-guides/)
 
 
-## Technical details
+# Directory setup
+1. create models directory on project root. program finds the ml model in `models/depth_anything_v2.mlpackage` path.
+2. create data directory on project root. program finds input data in `data/` directory. place videos in this directory.
+3. create logs directory on project root for capturing logs from `scripts/sender.py`.
 
-1. Communication Protocol: SRT protocol communication: Uses UDP as transport layer with low latency and is secure. Simple To implement and scalable on local network. TCP is not needed when sending video stream over local network (transmitting video streams over encrypted local network channel) (current ondevice chip specs: https://www.ambarella.com/wp-content/uploads/Ambarella_CV22S_Product_Brief_14SEP2021.pdf)
-
-2. Scaling: Local Hardware and network can be vertically scaled to decrease latency over number of devices. A network of 500Gb/s bandwidth can support max 100 HD video stream devices concurrently.
-
-1080p stream requires ~ 5 Mb/s\
-100 Streams ~ 500 Mb/s\
-
-AI Server Specs (Target Machine): \
-FLOPS: ~330 TFLOPS  \
-GPU: 4x RTX 4090 \
-GPU MEMORY: 48GB @ 21GB/s\
-MEMORY: 128GB @ 200 GB/s\
-CPU: 32 Core AMD EPYC\
-NETWORK: WIFI 6E @ 9.6 GB/s\
-
-
-## TODO: 
-- [x] single thread SRT server capable of accepting multiple connections. [Baseline implementation](https://github.com/Haivision/srt)
-- [x] parallel server cluster
-- [x] render multiple video streams.
-- [x] create binding for C/C++ call to inference func.
-- [x] display depth image with original in renderer.
-- [ ] compiled C/C++ binary with model and inference on GPU
-- [ ] benchmark execution time of the depth estimation algorithm
-- [ ] benchmark fps, latency per frame while varying resolution and number of streams
-
-## Benchmark
-Use ffmpeg with script to create video streams that from data that hit the target server.
-
-Performance metrics: 
-    !!equal length videos
-    !!assume perfect network
-    measure depth estimation latency
-    sustained performance (parallel vs serial)
-    roofline model
-    resolution: 400x400, 640x480, 1280x720, 1920x1080
-    througput fps: 10, 20, 30, 60
-    tasks: 1-16
-    cores: 1-8
+# Build and run
+N = Number of threads
+1. Running without renderer(generates latency results in `outputs/`)
+    ```
+    ./run.sh <N>
+    ```
+2. Running with renderer:
+     ```
+    ./run.sh <N> -r
+    ```
 
 
 
+[Troubleshooting libclang.dylib path issue on MacOS](https://github.com/twistedfall/opencv-rust/blob/master/TROUBLESHOOTING.md)

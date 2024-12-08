@@ -7,7 +7,6 @@ fn main() {
 
     println!("cargo:rustc-link-search=native={}", dst.display());
 
-    // println!("cargo:rustc-link-static=depth");
     println!("cargo:rustc-link-lib=static=depth");
 
     println!("cargo:rustc-link-lib=framework=Foundation");
