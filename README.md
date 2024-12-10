@@ -27,8 +27,8 @@ N = Number of threads
 
 # Extras
 The script file includes the following components:
-	•	main.py: Contains code for converting a PyTorch model to Core ML.
-	•	coremlinference.py: Implements model inferencing in Python.
-	•	sender.py: Handles streaming video sending functionality.
+1. main.py: Contains code for converting a PyTorch model to Core ML.
+2. coremlinference.py: Implements model inferencing in Python.
+3. sender.py: Handles streaming video sending functionality.
 
 [Troubleshooting libclang.dylib path issue on MacOS](https://github.com/twistedfall/opencv-rust/blob/master/TROUBLESHOOTING.md)
